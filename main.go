@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/antchfx/htmlquery"
+	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
@@ -54,13 +54,16 @@ func main() {
 		fmt.Printf("read content failed:%v", err)
 		return
 	}
-	doc, err := htmlquery.Parse(bytes.NewReader(body))
+
+	// 加载HTML文档
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err != nil {
-		fmt.Println("htmlquery.Parse failed:%v", err)
+		fmt.Println("read content failed:%v", err)
 		return
 	}
-	nodes := htmlquery.Find(doc, `//a[@class="index_inherit__A1ImK"]/h2/text()`)
-	for _, node := range nodes {
-		fmt.Println("fetch card news:", node.Data)
-	}
+
+	doc.Find("a.index_inherit__A1ImK h2").Each(func(i int, s *goquery.Selection) {
+		title := s.Text()
+		fmt.Printf("Review %d: %s\n", i, title)
+	})
 }
